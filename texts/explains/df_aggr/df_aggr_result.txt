@@ -1,0 +1,101 @@
+Completed in 37191 ms
+Node                      | # Tasks | Duration total (min, med, max) | # Rows | Est # Rows | Peak Mem total (min, med, max)
+--------------------------+---------+--------------------------------+--------+------------+-------------------------------
+*WholeStageCodegen (1)    | -       | 0 ms                           | -      | -          | -                             
+-*(2): ColumnarToRow      | -       | -                              | 0      | -          | -                             
+-*(3): Project            | -       | -                              | -      | -          | -                             
+-*(4): HashAggregate      | -       | -                              | 0      | -          | -                             
+*WholeStageCodegen (2)    | -       | 0 ms                           | -      | -          | -                             
+-*(6): HashAggregate      | -       | -                              | 0      | -          | -                             
+*WholeStageCodegen (3)    | -       | 0 ms                           | -      | -          | -                             
+-*(8): HashAggregate      | -       | -                              | 0      | -          | -                             
+*WholeStageCodegen (4)    | -       | 0 ms                           | -      | -          | -                             
+-*(10): HashAggregate     | -       | -                              | 0      | -          | -                             
+(1): Scan parquet         | -       | 0 ms                           | 0      | -          | -                             
+(5): Exchange             | -       | -                              | -      | -          | -                             
+(7): StateStoreRestore    | -       | -                              | 0      | -          | -                             
+(9): StateStoreSave       | -       | -                              | 0      | -          | -                             
+(11): Exchange            | -       | -                              | -      | -          | -                             
+(12): Sort                | -       | 0 ms                           | -      | -          | -                             
+(13): WriteToDataSourceV2 | -       | -                              | -      | -          | -              
+
+== Physical Plan ==
+WriteToDataSourceV2 (13)
++- Sort (12)
+   +- Exchange (11)
+      +- * HashAggregate (10)
+         +- StateStoreSave (9)
+            +- * HashAggregate (8)
+               +- StateStoreRestore (7)
+                  +- * HashAggregate (6)
+                     +- Exchange (5)
+                        +- * HashAggregate (4)
+                           +- * Project (3)
+                              +- * ColumnarToRow (2)
+                                 +- Scan parquet  (1)
+
+
+(1) Scan parquet 
+Output [7]: [avg_tmpr_c#147, city#149, id#152, wthr_date#156, year#157, month#158, day#159]
+Batched: true
+Location: CloudFilesSourceFileIndex [abfss://data@sttpdcsp02westeurope.dfs.core.windows.net/streamdata]
+ReadSchema: struct<avg_tmpr_c:double,city:string,id:string,wthr_date:string>
+
+(2) ColumnarToRow [codegen id : 1]
+Input [7]: [avg_tmpr_c#147, city#149, id#152, wthr_date#156, year#157, month#158, day#159]
+
+(3) Project [codegen id : 1]
+Output [4]: [avg_tmpr_c#147, city#149, id#152, wthr_date#156]
+Input [7]: [avg_tmpr_c#147, city#149, id#152, wthr_date#156, year#157, month#158, day#159]
+
+(4) HashAggregate [codegen id : 1]
+Input [4]: [avg_tmpr_c#147, city#149, id#152, wthr_date#156]
+Keys [2]: [city#149, wthr_date#156]
+Functions [4]: [partial_count(id#152) AS count#223L, partial_avg(avg_tmpr_c#147) AS (sum#226, count#227L), partial_min(avg_tmpr_c#147) AS min#229, partial_max(avg_tmpr_c#147) AS max#231]
+Aggregate Attributes [4]: [count(id#152)#223L, avg(avg_tmpr_c#147)#226, min(avg_tmpr_c#147)#229, max(avg_tmpr_c#147)#231]
+Results [7]: [city#149, wthr_date#156, count#223L, sum#226, count#227L, min#229, max#231]
+
+(5) Exchange
+Input [7]: [city#149, wthr_date#156, count#223L, sum#226, count#227L, min#229, max#231]
+Arguments: hashpartitioning(city#149, wthr_date#156, 200), ENSURE_REQUIREMENTS, [plan_id=303]
+
+(6) HashAggregate [codegen id : 2]
+Input [7]: [city#149, wthr_date#156, count#223L, sum#226, count#227L, min#229, max#231]
+Keys [2]: [city#149, wthr_date#156]
+Functions [4]: [merge_count(merge count#223L) AS count#223L, merge_avg(merge sum#226, count#227L) AS (sum#226, count#227L), merge_min(merge min#229) AS min#229, merge_max(merge max#231) AS max#231]
+Aggregate Attributes [4]: [count(id#152)#223L, avg(avg_tmpr_c#147)#226, min(avg_tmpr_c#147)#229, max(avg_tmpr_c#147)#231]
+Results [7]: [city#149, wthr_date#156, count#223L, sum#226, count#227L, min#229, max#231]
+
+(7) StateStoreRestore
+Input [7]: [city#149, wthr_date#156, count#223L, sum#226, count#227L, min#229, max#231]
+Arguments: [city#149, wthr_date#156], state info [ checkpoint = <unknown>, runId = 4bd218e3-0e82-43d1-85d4-a31a8bc09d18, opId = 0, ver = 0, numPartitions = 200], 2
+
+(8) HashAggregate [codegen id : 3]
+Input [7]: [city#149, wthr_date#156, count#223L, sum#226, count#227L, min#229, max#231]
+Keys [2]: [city#149, wthr_date#156]
+Functions [4]: [merge_count(merge count#223L) AS count#223L, merge_avg(merge sum#226, count#227L) AS (sum#226, count#227L), merge_min(merge min#229) AS min#229, merge_max(merge max#231) AS max#231]
+Aggregate Attributes [4]: [count(id#152)#223L, avg(avg_tmpr_c#147)#226, min(avg_tmpr_c#147)#229, max(avg_tmpr_c#147)#231]
+Results [7]: [city#149, wthr_date#156, count#223L, sum#226, count#227L, min#229, max#231]
+
+(9) StateStoreSave
+Input [7]: [city#149, wthr_date#156, count#223L, sum#226, count#227L, min#229, max#231]
+Arguments: [city#149, wthr_date#156], state info [ checkpoint = <unknown>, runId = 4bd218e3-0e82-43d1-85d4-a31a8bc09d18, opId = 0, ver = 0, numPartitions = 200], Append, -9223372036854775808, -9223372036854775808, 2
+
+(10) HashAggregate [codegen id : 4]
+Input [7]: [city#149, wthr_date#156, count#223L, sum#226, count#227L, min#229, max#231]
+Keys [2]: [city#149, wthr_date#156]
+Functions [4]: [finalmerge_count(merge count#223L) AS count(id#152)#62L, finalmerge_avg(merge sum#226, count#227L) AS avg(avg_tmpr_c#147)#64, finalmerge_min(merge min#229) AS min(avg_tmpr_c#147)#66, finalmerge_max(merge max#231) AS max(avg_tmpr_c#147)#68]
+Aggregate Attributes [4]: [count(id#152)#62L, avg(avg_tmpr_c#147)#64, min(avg_tmpr_c#147)#66, max(avg_tmpr_c#147)#68]
+Results [6]: [city#149, wthr_date#156, count(id#152)#62L AS hotels_count#63L, avg(avg_tmpr_c#147)#64 AS avg_tmpr_c#65, min(avg_tmpr_c#147)#66 AS min_tmpr_c#67, max(avg_tmpr_c#147)#68 AS max_tmpr_c#69]
+
+(11) Exchange
+Input [6]: [city#149, wthr_date#156, hotels_count#63L, avg_tmpr_c#65, min_tmpr_c#67, max_tmpr_c#69]
+Arguments: rangepartitioning(city#149 ASC NULLS FIRST, wthr_date#156 ASC NULLS FIRST, 200), ENSURE_REQUIREMENTS, [plan_id=315]
+
+(12) Sort
+Input [6]: [city#149, wthr_date#156, hotels_count#63L, avg_tmpr_c#65, min_tmpr_c#67, max_tmpr_c#69]
+Arguments: [city#149 ASC NULLS FIRST, wthr_date#156 ASC NULLS FIRST], true, 0
+
+(13) WriteToDataSourceV2
+Input [6]: [city#149, wthr_date#156, hotels_count#63L, avg_tmpr_c#65, min_tmpr_c#67, max_tmpr_c#69]
+Arguments: MicroBatchWrite[epoch: 0, writer: org.apache.spark.sql.execution.streaming.sources.MemoryStreamingWrite@4efbfe4d], org.apache.spark.sql.execution.datasources.v2.DataSourceV2Strategy$$Lambda$7393/469784240@7e4e6ac3

@@ -1,0 +1,31 @@
+== Parsed Logical Plan ==
+'Sort ['city ASC NULLS FIRST, 'wthr_date ASC NULLS FIRST], true
++- Project [city#132716, wthr_date#132723, hotels_count#132759L, avg_tmpr_c#132761, min_tmpr_c#132763, max_tmpr_c#132765]
+   +- Aggregate [city#132716, wthr_date#132723], [city#132716, wthr_date#132723, count(id#132719) AS hotels_count#132759L, avg(avg_tmpr_c#132714) AS avg_tmpr_c#132761, min(avg_tmpr_c#132714) AS min_tmpr_c#132763, max(avg_tmpr_c#132714) AS max_tmpr_c#132765]
+      +- StreamingRelation DataSource(org.apache.spark.sql.SparkSession@5688eace,cloudFiles,List(),None,List(),None,Map(cloudFiles.format -> parquet, cloudFiles.schemaLocation -> /dbfs/testdata/schema, cloudFiles.includeExistingFiles -> true, path -> abfss://data@sttpdcsp02westeurope.dfs.core.windows.net/streamdata),None), cloudFiles, [address#132713, avg_tmpr_c#132714, avg_tmpr_f#132715, city#132716, country#132717, geoHash#132718, id#132719, latitude#132720, longitude#132721, name#132722, wthr_date#132723, year#132724, month#132725, day#132726, _rescued_data#132727]
+
+== Analyzed Logical Plan ==
+city: string, wthr_date: string, hotels_count: bigint, avg_tmpr_c: double, min_tmpr_c: double, max_tmpr_c: double
+Sort [city#132716 ASC NULLS FIRST, wthr_date#132723 ASC NULLS FIRST], true
++- Project [city#132716, wthr_date#132723, hotels_count#132759L, avg_tmpr_c#132761, min_tmpr_c#132763, max_tmpr_c#132765]
+   +- Aggregate [city#132716, wthr_date#132723], [city#132716, wthr_date#132723, count(id#132719) AS hotels_count#132759L, avg(avg_tmpr_c#132714) AS avg_tmpr_c#132761, min(avg_tmpr_c#132714) AS min_tmpr_c#132763, max(avg_tmpr_c#132714) AS max_tmpr_c#132765]
+      +- StreamingRelation DataSource(org.apache.spark.sql.SparkSession@5688eace,cloudFiles,List(),None,List(),None,Map(cloudFiles.format -> parquet, cloudFiles.schemaLocation -> /dbfs/testdata/schema, cloudFiles.includeExistingFiles -> true, path -> abfss://data@sttpdcsp02westeurope.dfs.core.windows.net/streamdata),None), cloudFiles, [address#132713, avg_tmpr_c#132714, avg_tmpr_f#132715, city#132716, country#132717, geoHash#132718, id#132719, latitude#132720, longitude#132721, name#132722, wthr_date#132723, year#132724, month#132725, day#132726, _rescued_data#132727]
+
+== Optimized Logical Plan ==
+Sort [city#132716 ASC NULLS FIRST, wthr_date#132723 ASC NULLS FIRST], true
++- Aggregate [city#132716, wthr_date#132723], [city#132716, wthr_date#132723, count(id#132719) AS hotels_count#132759L, avg(avg_tmpr_c#132714) AS avg_tmpr_c#132761, min(avg_tmpr_c#132714) AS min_tmpr_c#132763, max(avg_tmpr_c#132714) AS max_tmpr_c#132765]
+   +- Project [avg_tmpr_c#132714, city#132716, id#132719, wthr_date#132723]
+      +- StreamingRelation DataSource(org.apache.spark.sql.SparkSession@5688eace,cloudFiles,List(),None,List(),None,Map(cloudFiles.format -> parquet, cloudFiles.schemaLocation -> /dbfs/testdata/schema, cloudFiles.includeExistingFiles -> true, path -> abfss://data@sttpdcsp02westeurope.dfs.core.windows.net/streamdata),None), cloudFiles, [address#132713, avg_tmpr_c#132714, avg_tmpr_f#132715, city#132716, country#132717, geoHash#132718, id#132719, latitude#132720, longitude#132721, name#132722, wthr_date#132723, year#132724, month#132725, day#132726, _rescued_data#132727]
+
+== Physical Plan ==
+Sort [city#132716 ASC NULLS FIRST, wthr_date#132723 ASC NULLS FIRST], true, 0
++- Exchange rangepartitioning(city#132716 ASC NULLS FIRST, wthr_date#132723 ASC NULLS FIRST, 200), ENSURE_REQUIREMENTS, [plan_id=28831]
+   +- *(4) HashAggregate(keys=[city#132716, wthr_date#132723], functions=[finalmerge_count(merge count#132780L) AS count(id#132719)#132758L, finalmerge_avg(merge sum#132783, count#132784L) AS avg(avg_tmpr_c#132714)#132760, finalmerge_min(merge min#132786) AS min(avg_tmpr_c#132714)#132762, finalmerge_max(merge max#132788) AS max(avg_tmpr_c#132714)#132764], output=[city#132716, wthr_date#132723, hotels_count#132759L, avg_tmpr_c#132761, min_tmpr_c#132763, max_tmpr_c#132765])
+      +- StateStoreSave [city#132716, wthr_date#132723], state info [ checkpoint = <unknown>, runId = 6e513812-1e8d-4cea-b416-349f56d3c650, opId = 0, ver = 0, numPartitions = 200], Append, -9223372036854775808, -9223372036854775808, 2
+         +- *(3) HashAggregate(keys=[city#132716, wthr_date#132723], functions=[merge_count(merge count#132780L) AS count#132780L, merge_avg(merge sum#132783, count#132784L) AS (sum#132783, count#132784L), merge_min(merge min#132786) AS min#132786, merge_max(merge max#132788) AS max#132788], output=[city#132716, wthr_date#132723, count#132780L, sum#132783, count#132784L, min#132786, max#132788])
+            +- StateStoreRestore [city#132716, wthr_date#132723], state info [ checkpoint = <unknown>, runId = 6e513812-1e8d-4cea-b416-349f56d3c650, opId = 0, ver = 0, numPartitions = 200], 2
+               +- *(2) HashAggregate(keys=[city#132716, wthr_date#132723], functions=[merge_count(merge count#132780L) AS count#132780L, merge_avg(merge sum#132783, count#132784L) AS (sum#132783, count#132784L), merge_min(merge min#132786) AS min#132786, merge_max(merge max#132788) AS max#132788], output=[city#132716, wthr_date#132723, count#132780L, sum#132783, count#132784L, min#132786, max#132788])
+                  +- Exchange hashpartitioning(city#132716, wthr_date#132723, 200), ENSURE_REQUIREMENTS, [plan_id=28819]
+                     +- *(1) HashAggregate(keys=[city#132716, wthr_date#132723], functions=[partial_count(id#132719) AS count#132780L, partial_avg(avg_tmpr_c#132714) AS (sum#132783, count#132784L), partial_min(avg_tmpr_c#132714) AS min#132786, partial_max(avg_tmpr_c#132714) AS max#132788], output=[city#132716, wthr_date#132723, count#132780L, sum#132783, count#132784L, min#132786, max#132788])
+                        +- *(1) Project [avg_tmpr_c#132714, city#132716, id#132719, wthr_date#132723]
+                           +- StreamingRelation cloudFiles, [address#132713, avg_tmpr_c#132714, avg_tmpr_f#132715, city#132716, country#132717, geoHash#132718, id#132719, latitude#132720, longitude#132721, name#132722, wthr_date#132723, year#132724, month#132725, day#132726, _rescued_data#132727]
