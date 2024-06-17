@@ -141,7 +141,7 @@ As this aggregated table is the base of our following data, examine the executio
 ![Aggregate input explain ](/screenshots/img_explain_aggr.png)
 
 
-We can see the [execution plan](/texts/explains/df_aggr/df_aggr_plan.txt), the [executed plan](/texts/explains/task1/task1_result.txt), and the executed [Visual Directed Acyclic Graph](/texts/explains/task1/task1_dag.png)
+We can see the [execution plan](/texts/explains/df_aggr/df_aggr_plan.txt), the [executed plan](/texts/explains/df_aggr/df_aggr_result.txt), and the executed [Visual Directed Acyclic Graph](/texts/explains/df_aggr/df_aggr_dag.png)
 
 ![Visual Directed Acyclic Graph](/texts/explains/df_aggr/df_aggr_dag.png)
 
@@ -212,7 +212,7 @@ Here are the results:
 ### Understanding the results
 
 Note, that although we got the expected result, we can observe the high incompleteness, and quality problems of the input data:
-* The number of hotels within a city is in a very wide range, from1 to multiple 100s.
+* The number of hotels within a city is in a very wide range, from 1 to multiple 100s.
 * As there are no real daily minimum and maximum values, the min, max and average temperatures are almost always equal. There are some cases, when they are differ, but only in speciak cases, when there are many hotel data, and the city is big enough, that some parts of it are in different 4-digit geohash locations, or is on a dividing line of multiple geohash locations.
 
 
